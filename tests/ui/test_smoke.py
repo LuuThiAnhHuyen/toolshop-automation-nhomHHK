@@ -35,3 +35,12 @@ def test_add_product_to_cart(page):
     product.add_to_cart(quantity=3)
 
     expect(product.cart_quantity).to_have_text("3")
+@pytest.mark.smoke
+def test_b2_add_claw_hammer_to_cart(page):
+    """Test 2 (Hạnh): Mở Claw Hammer, thêm số lượng 3, kiểm tra badge giỏ hàng = 3."""
+    home_page = HomePage(page).open()
+    product_page = home_page.open_product("Claw Hammer")
+    product_page.add_to_cart(quantity=3)
+    
+    # Kiểm tra badge giỏ hàng hiển thị số 3
+    expect(page.get_by_test_id("cart-quantity")).to_have_text("3")
