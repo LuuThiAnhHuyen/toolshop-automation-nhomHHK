@@ -1,16 +1,28 @@
 
+"""Sprint 1 - Smoke Tests for Toolshop.
+
+Test 1: Product search - Huyen
+Test 2: Add product to cart - Khoi
+Test 3: Invalid login - Hanh (to be added)
+Test 4: Empty contact form - Huyen
+"""
+
 import pytest
 from playwright.sync_api import expect
 
 from pages.home_page import HomePage
+from pages.contact_page import ContactPage
 
 
+# =====================================================
+# TEST 1 - HUYEN: TIM KIEM SAN PHAM
+# =====================================================
 @pytest.mark.smoke
 @pytest.mark.ui
 def test_search_product(page):
-    """Goal: test product search.
+    """Goal: verify product search.
     Precondition: Toolshop is available.
-    Expected: search results match the keyword."""
+    Expected: all displayed products contain the search keyword."""
 
     home = HomePage(page).open().search("pliers")
 
@@ -23,24 +35,44 @@ def test_search_product(page):
     assert all("pliers" in name.lower() for name in names)
 
 
+# =====================================================
+# TEST 2 - KHOI: THEM SAN PHAM VAO GIO HANG
+# =====================================================
 @pytest.mark.smoke
 @pytest.mark.ui
 def test_add_product_to_cart(page):
-    """Goal: add a product to the shopping cart.
-    Precondition: Toolshop is available and Claw Hammer is in the catalogue.
-    Expected: the cart badge shows the selected quantity."""
+    """Goal: verify adding products to the shopping cart.
+    Precondition: Claw Hammer is available.
+    Expected: the cart badge displays quantity 3."""
 
     product = HomePage(page).open().open_product("Claw Hammer")
 
     product.add_to_cart(quantity=3)
 
     expect(product.cart_quantity).to_have_text("3")
+
+
+# =====================================================
+# TEST 3 - HANH: DANG NHAP SAI
+# Hanh se bo sung bai test tai day.
+# =====================================================
+
+
+# =====================================================
+# TEST 4 - HUYEN: FORM LIEN HE TRONG
+# =====================================================
 @pytest.mark.smoke
-def test_b2_add_claw_hammer_to_cart(page):
-    """Test 2 (Hạnh): Mở Claw Hammer, thêm số lượng 3, kiểm tra badge giỏ hàng = 3."""
-    home_page = HomePage(page).open()
-    product_page = home_page.open_product("Claw Hammer")
-    product_page.add_to_cart(quantity=3)
-    
-    # Kiểm tra badge giỏ hàng hiển thị số 3
-    expect(page.get_by_test_id("cart-quantity")).to_have_text("3")
+@pytest.mark.ui
+def test_contact_empty_form(page):
+    """Goal: validate an empty contact form.
+    Precondition: all contact fields are empty.
+    Expected: subject and message required errors appear."""
+
+    contact = ContactPage(page).open()
+
+    contact.submit()
+
+    expect(contact.errors).to_contain_text([
+        "Subject is required",
+        "Message is required"
+    ])
