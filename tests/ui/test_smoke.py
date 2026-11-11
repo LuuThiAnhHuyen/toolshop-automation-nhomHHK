@@ -6,11 +6,12 @@ Test 2: Add product to cart - Khoi
 Test 3: Invalid login - Hanh (to be added)
 Test 4: Empty contact form - Huyen
 """
-
+import re
 import pytest
 from playwright.sync_api import expect
 
 from pages.home_page import HomePage
+from pages.login_page import LoginPage
 from pages.contact_page import ContactPage
 
 
@@ -56,7 +57,19 @@ def test_add_product_to_cart(page):
 # TEST 3 - HANH: DANG NHAP SAI
 # Hanh se bo sung bai test tai day.
 # =====================================================
+@pytest.mark.smoke
+@pytest.mark.ui
+def test_b3_login_wrong_password_shows_error(page):
+    """
+    Goal: Ensure logging in with non-existent credentials displays an error message and stays on login page.
+    Precondition: Use a random non-existent email (avoiding shared class account lockout).
+    Expected: Error message displays 'Invalid email or password' and the URL ends with /auth/login.
+    """
+    login_page = LoginPage(page).open()
+    login_page.login("nonexistent_user_hanh_99999@test.com", "WrongPassword123!")
 
+    expect(login_page.error).to_have_text("Invalid email or password")
+    expect(page).to_have_url(re.compile(r"/auth/login$"))
 
 # =====================================================
 # TEST 4 - HUYEN: FORM LIEN HE TRONG
