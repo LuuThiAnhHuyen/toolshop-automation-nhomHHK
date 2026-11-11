@@ -1,9 +1,9 @@
-
+import re
 import pytest
 from playwright.sync_api import expect
 
 from pages.home_page import HomePage
-
+from pages.login_page import LoginPage
 
 @pytest.mark.smoke
 @pytest.mark.ui
@@ -36,11 +36,15 @@ def test_add_product_to_cart(page):
 
     expect(product.cart_quantity).to_have_text("3")
 @pytest.mark.smoke
-def test_b2_add_claw_hammer_to_cart(page):
-    """Test 2 (Hạnh): Mở Claw Hammer, thêm số lượng 3, kiểm tra badge giỏ hàng = 3."""
-    home_page = HomePage(page).open()
-    product_page = home_page.open_product("Claw Hammer")
-    product_page.add_to_cart(quantity=3)
-    
-    # Kiểm tra badge giỏ hàng hiển thị số 3
-    expect(page.get_by_test_id("cart-quantity")).to_have_text("3")
+def test_b3_login_wrong_password_shows_error(page):
+    """
+    Mục tiêu: Đảm bảo đăng nhập bằng thông tin không tồn tại sẽ bị từ chối và hiển thị thông báo lỗi.
+    Tiền điều kiện: Dùng email ngẫu nhiên không tồn tại (tránh làm khóa tài khoản chung của lớp).
+    Kết quả mong đợi: Hiển thị thông báo 'Invalid email or password' và URL kết thúc bằng /auth/login.
+    """
+    login_page = LoginPage(page).open()
+    login_page.login("nonexistent_user_hanh_99999@test.com", "WrongPassword123!")
+
+    # Sửa lại đúng thuộc tính error của LoginPage
+    expect(login_page.error).to_have_text("Invalid email or password")
+    expect(page).to_have_url(re.compile(r"/auth/login$"))
