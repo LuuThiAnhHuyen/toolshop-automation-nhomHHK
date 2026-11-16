@@ -1,4 +1,6 @@
 
+import re
+
 from pages.base_page import BasePage
 
 
@@ -25,6 +27,17 @@ class CartPage(BasePage):
             money(text)
             for text in self.line_prices.all_inner_texts()
         ]
+
+    def product_title(self, name: str):
+        return self.product_titles.filter(
+            has_text=re.compile(rf"^\s*{re.escape(name)}\s*$")
+        )
+
+    def remove_product(self, name: str):
+        """Remove the named product from the cart table."""
+        row = self.product_title(name).first.locator("xpath=ancestor::tr")
+        row.locator("a.btn-danger").click()
+        return self
 
     def total_value(self) -> float:
         return money(self.total.inner_text())
