@@ -35,10 +35,11 @@ class HomePage(BasePage):
         )
         self.product_prices = page.get_by_test_id("product-price")
 
-        # Loc san pham theo danh muc - Sprint 2
+        # Loc danh muc - Sprint 2
         self.category_checkboxes = page.get_by_role("checkbox")
+        self.filtered_products = []
 
-        # TODO B2/B4: Bai hoc sau
+        # TODO: Price slider
         # price_slider_max = page.get_by_role("slider").nth(1)
 
     def open(self):
@@ -46,6 +47,7 @@ class HomePage(BasePage):
             lambda r: PRODUCT_LIST.search(r.url) is not None
         ):
             super().open()
+
         return self
 
     # B1.1 - Tim kiem san pham
@@ -82,7 +84,7 @@ class HomePage(BasePage):
             for p in self.product_prices.all_inner_texts()
         ]
 
-    # Sprint 2 - Tim checkbox theo ten danh muc
+    # Sprint 2 - Tim checkbox danh muc
     def category_is_selected(self, category: str):
         return self.page.get_by_role(
             "checkbox",
@@ -90,8 +92,18 @@ class HomePage(BasePage):
             exact=True
         )
 
-    # Sprint 2 - Loc san pham theo danh muc
+    # Sprint 2 - Loc danh muc va lay du lieu API
     def filter_by_category(self, category: str):
-        checkbox = self.category_is_selected(category)
-        checkbox.check()
+        with self.page.expect_response(
+            lambda response: (
+                PRODUCT_LIST.search(response.url) is not None
+                and response.status == 200
+            ),
+            timeout=15000
+        ) as response_info:
+            self.category_is_selected(category).check()
+
+        response_data = response_info.value.json()
+        self.filtered_products = response_data["data"]
+
         return self
